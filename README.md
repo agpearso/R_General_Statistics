@@ -125,152 +125,48 @@ ggqqplot(Heart_Rate, "Heart.Rate", facet.by = "Condition")
 gghistogram(Heart_Rate, "Heart.Rate", facet.by = "Condition")
 
 ?anova_test
-Heart_Rate_aov <- anova_test(data = Raw_Heart_Rate, dv = Heart.Rate, wid = Subject, within = Condition, type = 3)
+Heart_Rate_aov <- anova_test(data = Heart_Rate, dv = Heart.Rate, wid = Subject, within = Condition, type = 3)
 
-#Data = our data frame,
-#dv = our dependent variable name,
-#wid = column name containing individual subject identifier,
-#within = within-subjects factor,
-#type = type 1, 2, 3 ANOVA.Type 3 is the default of SPSS#
+get_anova_table(Heart_Rate_aov)
+print(Heart_Rate_aov)
 
-get_anova_table(Heart.Rate.aov)
-print(Heart.Rate.aov)
-
-#Post-hoc testing#
 ?p.adjust.methods
 
-#"holm", "hochberg", "hommel", "bonferroni", "BH", "BY","fdr", "none"
-
-Heart.Rate_pwc<- Raw_Heart_Rate %>%
+Heart_Rate_aov<- Heart_Rate %>%
   pairwise_t_test(
     Heart.Rate ~ Condition, paired = TRUE,
     p.adjust.method = "bonferroni")
-Heart.Rate_pwc
-#Set up data frame#
-
-Raw_Heart_Rate <-data.frame(Subject=c(rep(1:100, 4)),
-                      Condition=c(rep("0", times = 100), rep("30", times = 100), 
-                                  rep("45", times = 100), rep("60", times = 100)),
-                      Heart.Rate=c((Orthostatic_Tilt_Raw$Heart.Rate.Baseline), (Orthostatic_Tilt_Raw$Heart.Rate.30.Degrees), 
-                             (Orthostatic_Tilt_Raw$Heart.Rate.45.Degrees), (Orthostatic_Tilt_Raw$Heart.Rate.60.Degrees)))
+Heart_Rate_aov
 
 
-Raw_Heart_Rate
-view(Raw_Heart_Rate)
-###
-?str
-str(Raw_Heart_Rate)
-Raw_Heart_Rate$Subject<-as.factor(Raw_Heart_Rate$Subject)
-Raw_Heart_Rate$Condition<-as.factor(Raw_Heart_Rate$Condition)
-str(Raw_Heart_Rate)
-###
-Raw_Heart_Rate %>%
-  group_by(Condition) %>%
-  get_summary_stats(Heart.Rate, type = "mean_sd")
-###
-?ggplot
-Heart_Rate_Boxplot <- ggboxplot(Raw_Heart_Rate, x = "Condition", y = "Heart.Rate")
-Heart_Rate_Boxplot
-###
-Heart_Rate_ggBoxplot <- ggplot(Raw_Heart_Rate, aes(x = Condition, y = Heart.Rate, fill = Condition))+
-  geom_boxplot(position = position_dodge(width = 1), outlier.shape = NA, lwd = 1, fatten = 1, colour= "black")+
-  theme_classic()+
-  ylab("Heart Rate (bpm)")+
-  theme(legend.position="top")+
-  scale_y_continuous(breaks=c(40,60,80,100,120), labels = waiver(), limits=c(40,120))+
-  theme(axis.text.y = element_text(colour = "Black", face="bold", size = 12),text = element_text(size=18),
-        axis.text.x = element_text(colour = "Black", face = "bold", size = 12),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(colour = "Black", face="bold", size = 16),
-        axis.ticks.length = unit(4, "pt"), 
-        axis.ticks.x = element_line(color = "black"), axis.ticks.y = element_line(color = "black"))
-
-Heart_Rate_ggBoxplot
-###
-Heart.Rate_Violin <- ggplot(Raw_Heart_Rate, aes(x=Condition, y=Heart.Rate, fill=Condition)) +
-  geom_violin() +
-  scale_fill_viridis(discrete = TRUE, alpha=0.6, option="A") +
-  theme_classic()+
-  theme(
-    legend.position="right",
-    plot.title = element_text(size=0)
-  ) +
-  ggtitle("Violin chart") +
-  xlab("Condition")
-Heart.Rate_Violin
-###
-ggline(Raw_Heart_Rate, x = "Condition", y = "Heart.Rate",
-       add = c("mean_sd"),
-       palette = c("#00AFBB", "#E7B800"))
-###
-# Outlier? #
-Raw_Heart_Rate %>%
-  group_by(Condition) %>%
-  identify_outliers(Heart.Rate)
-# Normality? #
-Raw_Heart_Rate %>%
-  group_by(Condition) %>%
-  shapiro_test(Heart.Rate)
-###
-ggqqplot(Raw_Heart_Rate, "Heart.Rate", facet.by = "Condition")
-##
-gghistogram(Raw_Heart_Rate, "Heart.Rate", facet.by = "Condition")
-###
-
-#Repeated Measures ANOVA#
-?anova_test
-Heart.Rate.aov <- anova_test(data = Raw_Heart_Rate, dv = Heart.Rate, wid = Subject, within = Condition, type = 3)
-
-#Data = our data frame,
-#dv = our dependent variable name,
-#wid = column name containing individual subject identifier,
-#within = within-subjects factor,
-#type = type 1, 2, 3 ANOVA.Type 3 is the default of SPSS#
-
-get_anova_table(Heart.Rate.aov)
-print(Heart.Rate.aov)
-
-#Post-hoc testing#
-?p.adjust.methods
-
-#"holm", "hochberg", "hommel", "bonferroni", "BH", "BY","fdr", "none"
-
-Heart.Rate_pwc<- Raw_Heart_Rate %>%
-  pairwise_t_test(
-    Heart.Rate ~ Condition, paired = TRUE,
-    p.adjust.method = "bonferroni")
-Heart.Rate_pwc
+## Two-way RMANOVA: Example - Blood pressure by sex and condition of upright tilt in 50 men and women##
 
 
-######################
-### Two-way RMANOVA###
-######################
-
-Raw_Blood_Pressure <-data.frame(Subject=c(rep(1:100, 4)),
+Blood_Pressure <-data.frame(Subject=c(rep(1:100, 4)),
                                 Sex=c(rep(Orthostatic_Tilt_Raw$Sex, 4)),
                                 Condition=c(rep("0", times = 100), rep("30", times = 100), 
                                             rep("45", times = 100), rep("60", times = 100)),
-                                Blood.Pressure=c((Orthostatic_Tilt_Raw$Blood.Pressure.Baseline), (Orthostatic_Tilt_Raw$Blood.Pressure.30.Degrees), 
-                                             (Orthostatic_Tilt_Raw$Blood.Pressure.45.Degrees), (Orthostatic_Tilt_Raw$Blood.Pressure.60.Degrees)))
+                                Blood.Pressure=c((##File_name##$Blood_Pressure_Baseline), (##File_name##$Blood_Pressure_30_Degrees), 
+                                             (##File_name##$Blood_Pressure_45_Degrees), (##File_name##$Blood_Pressure_60_Degrees)))
 
 
-Raw_Blood_Pressure
-view(Raw_Blood_Pressure)
-###
-str(Raw_Blood_Pressure)
-Raw_Blood_Pressure$Subject<-as.factor(Raw_Blood_Pressure$Subject)
-Raw_Blood_Pressure$Sex<-as.factor(Raw_Blood_Pressure$Sex)
-Raw_Blood_Pressure$Condition<-as.factor(Raw_Blood_Pressure$Condition)
-str(Raw_Blood_Pressure)
-###
-Raw_Blood_Pressure %>%
+Blood_Pressure
+view(Blood_Pressure)
+
+str(Blood_Pressure)
+Blood_Pressure$Subject<-as.factor(Raw_Blood_Pressure$Subject)
+Blood_Pressure$Sex<-as.factor(Raw_Blood_Pressure$Sex)
+Blood_Pressure$Condition<-as.factor(Raw_Blood_Pressure$Condition)
+str(Blood_Pressure)
+
+Blood_Pressure %>%
   group_by(Sex, Condition) %>%
   get_summary_stats(Blood.Pressure, type = "mean_sd")
-###
-bxp <- ggboxplot(Raw_Blood_Pressure, x = "Condition", y = "Blood.Pressure", fill = "Sex")
+
+bxp <- ggboxplot(Blood_Pressure, x = "Condition", y = "Blood.Pressure", fill = "Sex")
 bxp
-###
-abxp <- ggplot(Raw_Blood_Pressure, aes(x = Condition, y = Blood.Pressure, fill = Sex))+
+
+abxp <- ggplot(Blood_Pressure, aes(x = Condition, y = Blood.Pressure, fill = Sex))+
   geom_boxplot(position = position_dodge(width = 1), outlier.shape = NA, lwd = 1, fatten = 1, colour= "black")+
   theme_classic()+
   ylab("Blood Pressure (mmHg)")+
@@ -284,8 +180,8 @@ abxp <- ggplot(Raw_Blood_Pressure, aes(x = Condition, y = Blood.Pressure, fill =
         axis.ticks.x = element_line(color = "black"), axis.ticks.y = element_line(color = "black"))
 
 abxp
-###
-Raw_Blood_Pressure_Violin <- ggplot(Raw_Blood_Pressure, aes(x=Condition, y=Blood.Pressure, fill=Sex)) +
+
+Blood_Pressure_Violin <- ggplot(Blood_Pressure, aes(x=Condition, y=Blood.Pressure, fill=Sex)) +
   geom_violin() +
   scale_fill_viridis(discrete = TRUE, alpha=1, option="C") +
   theme_classic()+
@@ -297,99 +193,90 @@ Raw_Blood_Pressure_Violin <- ggplot(Raw_Blood_Pressure, aes(x=Condition, y=Blood
   xlab("Condition")+
   scale_y_continuous(breaks=c(60,70,80,90,100,110,120), labels = waiver(), limits=c(60,120))
 Raw_Blood_Pressure_Violin
-###
-ggline(Raw_Blood_Pressure, x = "Condition", y = "Blood.Pressure", color = "Sex",
+
+ggline(Blood_Pressure, x = "Condition", y = "Blood.Pressure", color = "Sex",
        add = c("mean_se"),
        palette = c("#00AFBB", "#E7B800"))+
   scale_y_continuous(breaks=c(60,70,80,90,100,110,120), labels = waiver(), limits=c(60,120))
-###
-Raw_Blood_Pressure %>%
+
+Blood_Pressure %>%
   group_by(Sex, Condition) %>%
   identify_outliers(Blood.Pressure)
-###
-Raw_Blood_Pressure %>%
+
+Blood_Pressure %>%
   group_by(Sex, Condition) %>%
   shapiro_test(Blood.Pressure)
-#All#
-ggqqplot(Raw_Blood_Pressure, "Blood.Pressure", facet.by = "Condition")
-#Sex#
-ggqqplot(Raw_Blood_Pressure, "Blood.Pressure", ggtheme = theme_bw()) +
+
+ggqqplot(Blood_Pressure, "Blood.Pressure", facet.by = "Condition")
+
+ggqqplot(Blood_Pressure, "Blood.Pressure", ggtheme = theme_bw()) +
   facet_grid(Condition ~ Sex, labeller = "label_both")
 
-Raw_Blood_Pressure.aov <- anova_test(data = Raw_Blood_Pressure, dv = Blood.Pressure, wid = Subject, between = Sex, within = Condition, type = 3)
-get_anova_table(Raw_Blood_Pressure.aov)
-print(Raw_Blood_Pressure.aov)
+Blood_Pressure_aov <- anova_test(data = Blood_Pressure, dv = Blood.Pressure, wid = Subject, between = Sex, within = Condition, type = 3)
+get_anova_table(Blood_Pressure)
+print(Blood_Pressure)
 
-###
-Raw_Blood_Pressure_pwc<- Raw_Blood_Pressure %>%
+Blood_Pressure_pwc<- Blood_Pressure %>%
   pairwise_t_test(
     Blood.Pressure ~ Condition, paired = TRUE,
     p.adjust.method = "bonferroni")
 Raw_Blood_Pressure_pwc
 
-######################################
-### Effect of Condition within Sex ###
-######################################
+## Effect of Condition within Sex ##
 
-Raw_Blood_Pressure_One_way <- Raw_Blood_Pressure %>%
+
+Blood_Pressure_One_way <- Blood_Pressure %>%
   group_by(Sex) %>%
   anova_test(dv=Blood.Pressure, wid = Subject, within = Condition) %>%
   get_anova_table() %>%
   adjust_pvalue(method = "bonferroni")
-Raw_Blood_Pressure_One_way
-###
-Raw_Blood_Pressure_pwc <- Raw_Blood_Pressure %>%
+Blood_Pressure_One_way
+
+Blood_Pressure_pwc <- Blood_Pressure %>%
   group_by(Sex) %>%
   pairwise_t_test(
     Blood.Pressure ~ Condition, paired = TRUE,
     p.adjust.method = "bonferroni"
   )
-Raw_Blood_Pressure_pwc
-view(Raw_Blood_Pressure_pwc)
+Blood_Pressure_pwc
+view(Blood_Pressure_pwc)
 
-########################################
-### Sex Differences Within Condition ###
-########################################
+## Effect of Sex within Condition ##
 
-Raw_Blood_Pressure_pwc <- Raw_Blood_Pressure %>%
+
+Blood_Pressure_pwc <- Blood_Pressure %>%
   group_by(Condition) %>%
   pairwise_t_test(
     Blood.Pressure ~ Sex, paired = TRUE,
     p.adjust.method = "bonferroni"
   )
-Raw_Blood_Pressure_pwc
-view(Raw_Blood_Pressure_pwc)
-###
-Raw_Blood_Pressure_pwc <- Raw_Blood_Pressure_pwc %>% add_xy_position(x = "Condition")
+Blood_Pressure_pwc
+view(Blood_Pressure_pwc)
+
+Blood_Pressure_pwc <- Blood_Pressure_pwc %>% add_xy_position(x = "Condition")
 bxp + 
-  stat_pvalue_manual(Raw_Blood_Pressure_pwc, tip.length = 0, hide.ns = TRUE) +
+  stat_pvalue_manual(Blood_Pressure_pwc, tip.length = 0, hide.ns = TRUE) +
   labs(
-    subtitle = get_test_label(Raw_Blood_Pressure.aov, detailed = TRUE),
-    caption = get_pwc_label(Raw_Blood_Pressure_pwc)
+    subtitle = get_test_label(Blood_Pressure_pwc.aov, detailed = TRUE),
+    caption = get_pwc_label(Blood_Pressure_pwc)
   )
 
-####################
-### Correlations ###
-####################
+
+## Correlations ##
+
 
 ?cor.test
 
-cor.test(x = Orthostatic_Tilt_Raw$Heart.Rate.Baseline, Orthostatic_Tilt_Raw$Blood.Pressure.Baseline)
-cor.test(x = Orthostatic_Tilt_Change$Heart.Rate.60.Degrees, Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees)
+cor.test(x = ##File_name##$Heart_Rate_Baseline, ##File_name##$Heart_Rate_60_Degrees)
+cor.test(x = ##File_name##$Blood_Pressure_Baseline, ##File_name##$Blood_Pressure_60_Degrees)
 
-#method = "pearson", "kendall", or "spearman"
 
-cor.test(x = Orthostatic_Tilt_Change$Heart.Rate.60.Degrees, Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees, method = c("spearman"), exact = FALSE)
-
-### Graph ###
 ?plot
 
-plot(x = Orthostatic_Tilt_Change$Heart.Rate.60.Degrees, Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees)
+plot(x = ##File_name##$Heart_Rate_Baseline, ##File_name##$Heart_Rate_60_Degrees)
 
-plot(x = Orthostatic_Tilt_Change$Heart.Rate.60.Degrees, Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees, 
-     xlab="Change Heart Rate (bpm)", ylab= "Change Blood Pressure (mmHg)",
-     col = ifelse(Orthostatic_Tilt_Change$Sex == "1", "Red", "Blue"),
-pch = ifelse(Orthostatic_Tilt_Change$Sex == "1", 19, 15))
-abline(lm(Male_Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees~Male_Orthostatic_Tilt_Change$Heart.Rate.60.Degrees), lwd = 2, col = "Blue")
-abline(lm(Female_Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees~Female_Orthostatic_Tilt_Change$Heart.Rate.60.Degrees), lwd = 2, col = "Red")
-abline(lm(Orthostatic_Tilt_Change$Blood.Pressure.60.Degrees~Orthostatic_Tilt_Change$Heart.Rate.60.Degrees), lwd = 2, col = "Black")
+plot(x = ##File_name##$Heart_Rate_Baseline, ##File_name##$Heart_Rate_60_Degrees, 
+     xlab="Heart ate at baseline (bpm)", ylab= "Heart rate at 60 degrees (bpm)",
+     col = ifelse(##File_name##$Sex == "1", "Red", "Blue"),
+pch = ifelse(##File_name##$Sex == "1", 19, 15))
+abline(lm(##File_name##$Heart_Rate_60_Degrees~##File_name##$Heart_Rate_Baseline), lwd = 2, col = "Black")
